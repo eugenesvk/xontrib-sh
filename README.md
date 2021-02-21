@@ -55,6 +55,9 @@ $XONTRIB_SH_USEFIRST = True # default True
 # Given '!bash ', match 'bash' to the full name of each shell in $XONTRIB_SH_SHELLS
 $XONTRIB_SH_USEFULL  = True # default True
 ```
+__NB!__ Extra __Windows__ option: to pass a command to a shell within [WSL](https://docs.microsoft.com/en-us/windows/wsl/about), add `w` after the shell name, e.g. for 'fish' installed within WSL:
+
+`!fishw` ` ` or `!fw` ` `
 
 ## The main use case
 

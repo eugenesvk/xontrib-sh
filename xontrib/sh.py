@@ -1,4 +1,5 @@
 from shutil import which
+import subprocess
 
 _shells = list(__xonsh__.env.get('XONTRIB_SH_SHELLS', ['bash', 'sh']))
 _bash_wsl = 'c:\\windows\\system32\\bash.EXE'
@@ -36,12 +37,21 @@ def onepath(cmd, **kw):
             return f'echo @({repr(check_output_all.lstrip())})'
     elif len(cmd) > 3 and cmd.startswith('!'):
         first_compatible_shell = None
+        wsl_prefix = ''
         if _match_first_char:
             for shell in _shells:
                 if cmd.startswith('!' + shell[0] + ' '):
                     exists = which(shell)
                     if exists and (exists != _bash_wsl):
                         first_compatible_shell = shell
+                    break
+                elif cmd.startswith('!' + shell[0] + 'w' + ' '):
+                    try:
+                        if subprocess.check_output(["wsl", "-e", "which", shell]):
+                            first_compatible_shell = shell
+                            wsl_prefix = 'wsl -e '
+                    except:
+                        pass
                     break
         if _match_full_name:
             for shell in _shells:
@@ -50,6 +60,14 @@ def onepath(cmd, **kw):
                     if exists and (exists != _bash_wsl):
                         first_compatible_shell = shell
                     break
+                elif cmd.startswith('!' + shell + 'w' + ' '):
+                    try:
+                        if subprocess.check_output(["wsl", "-e", "which", shell]):
+                            first_compatible_shell = shell
+                            wsl_prefix = 'wsl -e '
+                    except:
+                        pass
+                    break
 
         shell_cmd = cmd[cmd.find(' '):].strip()
 
@@ -57,7 +75,7 @@ def onepath(cmd, **kw):
             return cmd
 
         if first_compatible_shell:
-            return f'{first_compatible_shell} -c @({repr(shell_cmd)})'
+            return f'{wsl_prefix}{first_compatible_shell} -c @({repr(shell_cmd)})'
         else:
             return f'echo @({repr("")})'
 

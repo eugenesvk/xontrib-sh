@@ -5,6 +5,7 @@ _bash_win = 'bash.exe'
 _installed_shells = []
 _match_first_char = __xonsh__.env.get('XONTRIB_SH_MATCHFIRST', True)
 _match_full_name = __xonsh__.env.get('XONTRIB_SH_MATCHFULL', True)
+_shells_wo_syntax_check = ['pwsh', 'powershell', 'cmd']
 
 
 @events.on_transform_command
@@ -29,6 +30,10 @@ def onepath(cmd, **kw):
         first_compatible_shell = None
         check_output_all = ''
         for s in _installed_shells:
+            if len(_installed_shells) == 1:   # don't check syntax for a single shell
+                return f'{s} -c @({repr(shell_cmd)})'
+            if s in _shells_wo_syntax_check:  # skip shells that don't have a syntax check
+                continue
             check_output = __xonsh__.subproc_captured_stdout([s, '-nc', shell_cmd, '2>&1']).strip()
             if check_output == '':
                 first_compatible_shell = s

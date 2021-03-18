@@ -31,7 +31,10 @@ def onepath(cmd, **kw):
         check_output_all = ''
         for s in _installed_shells:
             if len(_installed_shells) == 1:   # don't check syntax for a single shell
-                return f'{s} -c @({repr(shell_cmd)})'
+                if s.rstrip('.exe').lower() == 'cmd':
+                    return f'{s} /C @({repr(shell_cmd)})'
+                else:
+                    return f'{s} -c @({repr(shell_cmd)})'
             if s in _shells_wo_syntax_check:  # skip shells that don't have a syntax check
                 continue
             check_output = __xonsh__.subproc_captured_stdout([s, '-nc', shell_cmd, '2>&1']).strip()
@@ -70,7 +73,9 @@ def onepath(cmd, **kw):
         if not shell_cmd:
             return cmd
 
-        if first_compatible_shell:
+        if first_compatible_shell.rstrip('.exe').lower() == 'cmd':
+            return f'{first_compatible_shell} /C @({repr(shell_cmd)})'
+        elif first_compatible_shell:
             return f'{first_compatible_shell} -c @({repr(shell_cmd)})'
         else:
             ret_val = "xontrib-sh: '" + cmd[1:cmd.find(" ")] + "'" \
